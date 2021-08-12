@@ -50,6 +50,16 @@ userSchema.pre('save', function(next) {
 
 });
 
+userSchema.methods.comparePassword = function(plainPassword, cb) {
+  // 비교를 위해 암호화된 비밀번호를 복호화 할 수 없음
+  // 즉, 전달받은 패스워드를 암호화하여 비교
+
+  bcrypt.compare(plainPassword, this.password, function(err, isMatch) {
+    if(err) return cb(err),
+      cb(null, isMatch)
+  }) 
+}
+
 const User = mongoose.model('User', userSchema)
 
 module.exports = { User }
