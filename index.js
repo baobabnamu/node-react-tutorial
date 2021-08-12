@@ -4,11 +4,13 @@ const port = 3000
 const nodemon = require('nodemon');
 const config = require('./config/key');
 const { User } = require('./models/User')
+const cookieParser = require('cookie-parser')
 
 // application/x-www-form-urlenconded 를 통해 파싱하여 데이터를 가져옴
 app.use(express.urlencoded({extended: true}));
 // JSON 데이터 파싱 
 app.use(express.json());
+app.use(cookieParser());
 
 const mongoose = require('mongoose')
 mongoose.connect(config.mongoURI, {
@@ -16,7 +18,7 @@ mongoose.connect(config.mongoURI, {
 }).then(() => console.log('MongoDB connected...'))
 .catch(err => console.log(err))
 
-app.post('/register', (req, res) => {
+app.post('/api/users/register', (req, res) => {
   // bodyParser를 통해 분석된 request 요청의 body 데이터를 User.js(유저 스키마)에 전달
   // 스키마 구조를 참조하여 데이터 형태가 변환(패스워드 암호화 등)되어 몽고 DB 모델로 반환됨
   // 즉, user 객체는 몽고 DB 모델임.
@@ -33,24 +35,25 @@ app.post('/register', (req, res) => {
     })
 })
 
-app.post('/login', (req, res) => {
-
+app.post('/api/users/signin', (req, res) => {
   // 몽고DB에서 이메일 조회
-  User.findOne({email: req.body.email}, (err, userInfo) => {
-    if(!userInfo) {
+  User.findOne({email: req.body.email}, (err, user) => {
+    if(!user) {
       return res.json({
         loginSuccess: false,
         message: "해당 유저는 존재하지 않습니다."
       })
     }
     // 비밀번호 비교 로직
-    user.comparePassword(req.body.comparePassword, (err, isMatch) => {
-      if(!isMatch)
-        return res.json({loginSuccess: false, message: "틀린 비밀번호입니다."})
-      
+    user.comparePassword(req.body.password, (err, isMatch) => {
+      if(!isMatch) return res.json({loginSuccess: false, message: "틀린 비밀번호입니다."})
       // 토큰 생성 로직
       user.generateToken((err, user) => {
-
+        if(err) return res.status(400).send(err);
+        // 쿠키에 토큰 저장
+        res.cookie("x_auth", user.token)
+        .status(200)
+        .json({loginSuccess:true, userId: user._id})
       })
     })
   })
