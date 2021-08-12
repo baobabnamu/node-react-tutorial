@@ -39,21 +39,21 @@ app.post('/api/users/signin', (req, res) => {
   // 몽고DB에서 이메일 조회
   User.findOne({email: req.body.email}, (err, user) => {
     if(!user) {
-      return res.json({
+      return res.json({   // JSON 데이터로 false 반환
         loginSuccess: false,
         message: "해당 유저는 존재하지 않습니다."
       })
     }
-    // 비밀번호 비교 로직
+    // 비밀번호 비교 로직 호출
     user.comparePassword(req.body.password, (err, isMatch) => {
       if(!isMatch) return res.json({loginSuccess: false, message: "틀린 비밀번호입니다."})
-      // 토큰 생성 로직
+      // 토큰 생성 로직 호출
       user.generateToken((err, user) => {
         if(err) return res.status(400).send(err);
-        // 쿠키에 토큰 저장
+        // 생성된 토큰을 쿠키(name: x_auth)에 저장
         res.cookie("x_auth", user.token)
-        .status(200)
-        .json({loginSuccess:true, userId: user._id})
+        .status(200) // HTTP 200 반환
+        .json({loginSuccess:true, userId: user._id}) // JSON 데이터로 true 반환
       })
     })
   })
