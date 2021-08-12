@@ -1,35 +1,35 @@
-const express = require('express');
-const app = express();
-const port = 3000;
-const bodyParser = require('body-parser');
-const { User } = require('./models/User');
+const express = require('express')
+const app = express()
+const port = 3000
 const nodemon = require('nodemon');
 const config = require('./config/key');
+const { User } = require('./models/User')
 
-// application/x-www-form-urlencoded 를 분석 (jQuery/Ajax의 기본 타입)
-// extended: true는 객체 안에 객체가 파싱될 수 있도록 하는 옵션
-app.use(bodyParser.urlencoded( {extended:  true} ) );
-// application/json 를 분석 (json 타입 분석)
-app.use(bodyParser.json());
+// application/x-www-form-urlenconded 를 통해 파싱하여 데이터를 가져옴
+app.use(express.urlencoded({extended: true}));
+// JSON 데이터 파싱 
+app.use(express.json());
 
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 mongoose.connect(config.mongoURI, {
   useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false
-}).then(() => console.log("MongoDB Connected..."))
-.catch(err => console.log(err));
-
-app.get('/', (req, res) => { res.send('Hello World!!!') });
+}).then(() => console.log('MongoDB connected...'))
+.catch(err => console.log(err))
 
 app.post('/register', (req, res) => {
-  const user = new User;
+  // 회원 가입시 필요한 정보 client에서 가져와 DB에 넣기
+  // bodyParser를 통해 분석된 request 요청의 body 데이터를 User.js에 전달
+  // User.js에 의해 DB에 삽입됨.
+  const user = new User(req.body)
+
   user.save((err, userInfo) => {
-
+    console.log(req.body)
     if(err) return res.json({success: false, err})
-
     return res.status(200).json({
       success: true
-    });
-  });
-});
+      })
+    })
+})
+
 
 app.listen(port, () => { console.log(`Example app listening at http://localhost:${port}`) });
