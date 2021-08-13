@@ -2,9 +2,10 @@ const express = require('express')
 const app = express()
 const port = 3000
 const nodemon = require('nodemon');
-const config = require('./config/key');
-const { User } = require('./models/User')
 const cookieParser = require('cookie-parser')
+const config = require('./config/key');
+const { auth } = require('./middleware/auth')
+const { User } = require('./models/User')
 
 // application/x-www-form-urlenconded 를 통해 파싱하여 데이터를 가져옴
 app.use(express.urlencoded({extended: true}));
@@ -59,6 +60,20 @@ app.post('/api/users/signin', (req, res) => {
   })
 
 })
+
+app.get('/api/users/auth', auth, (req, res) => {
+  req.status(200).json({
+    _id: req.user._id,
+    isAdmin: req.user.role === 0 ? false : true,
+    isAuth: true,
+    email: req.user.email,
+    name: req.user.name,
+    lastname: req.user.lastname,
+    role: req.user.role,
+    image: req.user.image
+  })
+})
+
 
 
 app.listen(port, () => { console.log(`Example app listening at http://localhost:${port}`) });

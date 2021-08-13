@@ -65,12 +65,27 @@ userSchema.methods.comparePassword = function(plainPassword, cb) {
 userSchema.methods.generateToken = function(cb) {
   let user = this;
 
-  // jsonwebtoken를 통한 토큰 생성 (토큰 생성 시 파라미터가 문자열이여야 함. 따라서 HexCode -> String으로 변환)
+  // jsonwebtoken를 통한 토큰 생성 (토큰 생성 시 파라미터가 문자열이여야 함. 
+  // 따라서 HexCode -> String으로 변환)
   let token = jwt.sign(user._id.toHexString(), 'secretToken')
   user.token = token 
   user.save(function(err, user) { 
     if(err) return cb(err)
     cb(null, user);
+  })
+}
+
+userSchema.statics.findByToken = function(token, cb) {
+  let user = this;
+  // user._id + '' = token
+  // 토큰을 복호화한다.
+  jwt.verify(token, 'secretToken', function (err, decoded) {
+    // 유저 아이디를 이용하여 유저를 찾은 뒤
+    // 클라이언트에서 가져온 토큰과 DB에 보유한 토큰을 비교
+    user.findOne({ "_id": decoded, "token": token }, function (err, user) {
+      if(err) return cb(err);
+      cb(null, user);
+    })
   })
 }
 
