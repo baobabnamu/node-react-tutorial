@@ -28,7 +28,6 @@ app.post('/api/users/register', (req, res) => {
   // 몽고 DB 모델의 메서드인 save를 통해 몽고 DB에 값을 저장
   // 만약 err가 출력될 경우 false를 반환, 그 외의 모든 값은 HTTP 200 & true를 반환
   user.save((err, userInfo) => {
-    console.log(req.body)
     if(err) return res.json({success: false, err})
     return res.status(200).json({
       success: true
