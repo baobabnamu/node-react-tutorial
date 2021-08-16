@@ -1,3 +1,6 @@
 npm install mongoose --save
 npm install express --save
 npm install nodemon --save
+npm install bcrypt --save
+npm install cookie-parser --save
+npm install jsonwebtoken --save
