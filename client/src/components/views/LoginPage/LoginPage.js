@@ -1,6 +1,10 @@
+import axios from 'axios'
 import React, { useState } from 'react'
+import { useDispatch } from 'react-redux'
+import { loginUser } from '../../../_actions/user_action'
 
-function LoginPage() {
+function LoginPage(props) {
+  const dispatch = useDispatch();
 
   const [Email, setEmail] = useState("")  
   const [Password, setPassword] = useState("")
@@ -15,9 +19,20 @@ function LoginPage() {
   
   const onSubmitHandler = (event) => {
     event.preventDefault(); // 페이지 새로고침 방지
-    
-    console.log('Email', Email);
-    console.log('Password', Password);
+
+    let body = {
+      email: Email,
+      password: Password
+    }
+
+    dispatch(loginUser(body))
+      .then(response => {
+        if(response.payload.loginSuccess) {
+          props.history.push('/')
+        } else {
+          alert('Error')
+        }
+      })
   }
   
   return (
