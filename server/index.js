@@ -61,7 +61,7 @@ app.post('/api/users/login', (req, res) => {
 })
 
 app.get('/api/users/auth', auth, (req, res) => {
-  req.status(200).json({
+  res.status(200).json({
     _id: req.user._id,
     isAdmin: req.user.role === 0 ? false : true,
     isAuth: true,
@@ -72,6 +72,7 @@ app.get('/api/users/auth', auth, (req, res) => {
     image: req.user.image
   })
 })
+
 
 app.get('/api/users/logout', auth, (req, res) => {
   User.findOneAndUpdate({_id: req.user._id}, 
